@@ -8,37 +8,28 @@ function HomeScreen({ navigation }) {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('Details')}
+        onPress={() => navigation.navigate('Expen')}
       >
-        <Text style={styles.buttonText}>صفحه کمک نقدی</Text>
+        <Text style={styles.buttonText}>هزینه ها</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate('Profile')}
       >
-        <Text style={styles.buttonText}>صفحه پروفایل</Text>
+        <Text style={styles.buttonText}>بانک ها</Text>
       </TouchableOpacity>
-
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('Infor')}
+        onPress={() => navigation.navigate('Income')}
       >
-        <Text style={styles.buttonText}>صفحه اطلاعات مددجو</Text>
+        <Text style={styles.buttonText}>در آمد ها</Text>
       </TouchableOpacity>
-
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('File')}
+        onPress={() => navigation.navigate('TranScreen')}
       >
-        <Text style={styles.buttonText}>پرونده ها</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('Test')}
-      >
-        <Text style={styles.buttonText}>تست</Text>
+        <Text style={styles.buttonText}>تراکنش جدید</Text>
       </TouchableOpacity>
     </View>
   );

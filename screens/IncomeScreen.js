@@ -11,42 +11,41 @@ const db = SQLite.openDatabase(
   }
 );
 
-const InsertBank = ({ navigation }) => {
-  const [users, setUsers] = useState([]);
+const IncomeScreen = ({ navigation }) => {
+  const [income, setIncome] = useState([]);
 
   useEffect(() => {
-    loadUsers(); // بارگذاری کاربران هنگام بارگذاری کامپوننت
+    loadIncome(); // بارگذاری درآمدها هنگام بارگذاری کامپوننت
   }, []);
 
-  const loadUsers = () => {
+  const loadIncome = () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM banks',
+        'SELECT * FROM income',
         [],
         (_, results) => {
-          const usersArray = [];
+          const incomeArray = [];
           for (let i = 0; i < results.rows.length; i++) {
-            usersArray.push(results.rows.item(i));
+            incomeArray.push(results.rows.item(i));
           }
-          setUsers(usersArray);
+          setIncome(incomeArray);
         },
-        error => { console.error('Error loading users: ', error); }
+        error => { console.error('Error loading income: ', error); }
       );
     });
   };
 
   return (
     <View style={styles.container}>
-      {users.map((bank, index) => (
+      {income.map((item, index) => (
         <View key={index} style={styles.row}>
-          <Text style={styles.textrow}>{bank.name}</Text>
-
-          <Text style={styles.textrow}>{bank.amount}</Text>
+          <Text style={styles.textrow}>{item.source}</Text>
+          <Text style={styles.textrow}>{item.amount}</Text>
         </View>
       ))}
 
       <View style={styles.row}>
-        <TouchableOpacity onPress={() => navigation.navigate('InsertBank')}>
+        <TouchableOpacity onPress={() => navigation.navigate('InsertIncome')}>
           <Ionicons style={styles.icons} name="add-outline" size={24} color="black" />
         </TouchableOpacity>
         
@@ -78,4 +77,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InsertBank;
+export default IncomeScreen;
