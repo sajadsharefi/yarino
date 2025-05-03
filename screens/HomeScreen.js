@@ -31,6 +31,12 @@ function HomeScreen({ navigation }) {
       >
         <Text style={styles.buttonText}>تراکنش جدید</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('Massege')}
+      >
+        <Text style={styles.buttonText}>دریافت پیامک ها</Text>
+      </TouchableOpacity>
     </View>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
 import SQLite from 'react-native-sqlite-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -12,28 +12,15 @@ const db = SQLite.openDatabase(
   }
 );
 
-const  FromScreen = () => {
+const FromScreen = ({ route }) => {
   const navigation = useNavigation();
+  const { onItemSelected } = route.params; // Changed to a single callback
   const [showBankContent, setShowBankContent] = useState(false);
   const [showExpenseContent, setShowExpenseContent] = useState(false);
   const [showIncomeContent, setShowIncomeContent] = useState(false);
   const [banks, setBanks] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [incomes, setIncomes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const toggleBankContent = () => {
-    setShowBankContent(!showBankContent);
-  };
-
-  const toggleExpenseContent = () => {
-    setShowExpenseContent(!showExpenseContent);
-  };
-
-  const toggleIncomeContent = () => {
-    setShowIncomeContent(!showIncomeContent);
-  };
 
   const fetchBanks = () => {
     db.transaction(tx => {
@@ -55,7 +42,6 @@ const  FromScreen = () => {
   };
 
   const fetchExpenses = () => {
-    setLoading(true);
     db.transaction(tx => {
       tx.executeSql(
         'SELECT * FROM expenses',
@@ -66,22 +52,18 @@ const  FromScreen = () => {
             fetchedExpenses.push(results.rows.item(i));
           }
           setExpenses(fetchedExpenses);
-          setLoading(false);
         },
         error => {
           console.error("Error fetching expenses:", error);
-          setError("عدم توانایی در بارگذاری هزینه‌ها.");
-          setLoading(false);
         }
       );
     });
   };
 
   const fetchIncomes = () => {
-    setLoading(true);
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM income',
+        'SELECT * FROM incomes',
         [],
         (_, results) => {
           let fetchedIncomes = [];
@@ -89,26 +71,12 @@ const  FromScreen = () => {
             fetchedIncomes.push(results.rows.item(i));
           }
           setIncomes(fetchedIncomes);
-          setLoading(false);
         },
         error => {
           console.error("Error fetching incomes:", error);
-          setError("عدم توانایی در بارگذاری درآمدها.");
-          setLoading(false);
         }
       );
     });
-  };
-
-  const handleSelect = (selectedItem, type) => {
-    // تنظیم مقدار انتخاب شده و رفتن به TranScreen
-    if (type === 'bank') {
-      navigation.navigate('TranScreen', { sourceBank: selectedItem.name });
-    } else if (type === 'expense') {
-      navigation.navigate('TranScreen', { sourceExpense: selectedItem.description });
-    } else if (type === 'income') {
-      navigation.navigate('TranScreen', { sourceIncome: selectedItem.source });
-    }
   };
 
   useEffect(() => {
@@ -117,21 +85,40 @@ const  FromScreen = () => {
     fetchIncomes();
   }, []);
 
+  const handleItemSelect = (item, type) => { // Unified handler
+    let selectedValue = '';
+    switch (type) {
+      case 'bank':
+        selectedValue = item.name;
+        break;
+      case 'expense':
+        selectedValue = item.description;
+        break;
+      case 'income':
+        selectedValue = item.source;
+        break;
+      default:
+        console.warn('Unknown item type');
+        return;
+    }
+    onItemSelected(selectedValue); // Pass the selected value
+    navigation.goBack();
+  };
+
+
   return (
     <View style={styles.container}>
-      {/* بخش بانک‌ها */}
-      <TouchableOpacity style={styles.box} onPress={toggleBankContent}>
+      <TouchableOpacity style={styles.box} onPress={() => setShowBankContent(!showBankContent)}>
         <View style={styles.toggleButton}>
           <Icon name="chevron-down-outline" size={24} color="black" />
           <Text style={styles.toggleButtonText}>بانک‌ها</Text>
         </View>
-
         {showBankContent && (
           <FlatList
             data={banks}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => handleSelect(item, 'bank')}>
+              <TouchableOpacity onPress={() => handleItemSelect(item, 'bank')}>
                 <View style={styles.option}>
                   <Text style={styles.optionText}>{item.name}</Text>
                 </View>
@@ -141,59 +128,43 @@ const  FromScreen = () => {
         )}
       </TouchableOpacity>
 
-      {/* بخش هزینه‌ها */}
-      <TouchableOpacity style={styles.box} onPress={toggleExpenseContent}>
+      <TouchableOpacity style={styles.box} onPress={() => setShowExpenseContent(!showExpenseContent)}>
         <View style={styles.toggleButton}>
           <Icon name="chevron-down-outline" size={24} color="black" />
           <Text style={styles.toggleButtonText}>هزینه‌ها</Text>
         </View>
-
-        {loading ? (
-          <ActivityIndicator size="small" color="#0000ff" />
-        ) : error ? (
-          <Text style={styles.errorText}>{error}</Text>
-        ) : (
-          showExpenseContent && (
-            <FlatList
-              data={expenses}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => handleSelect(item, 'expense')}>
-                  <View style={styles.option}>
-                    <Text style={styles.optionText}>{item.description}</Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-            />
-          )
+        {showExpenseContent && (
+          <FlatList
+            data={expenses}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => handleItemSelect(item, 'expense')}>
+                <View style={styles.option}>
+                  <Text style={styles.optionText}>{item.description}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
         )}
       </TouchableOpacity>
 
-      {/* بخش درآمدها */}
-      <TouchableOpacity style={styles.box} onPress={toggleIncomeContent}>
+      <TouchableOpacity style={styles.box} onPress={() => setShowIncomeContent(!showIncomeContent)}>
         <View style={styles.toggleButton}>
           <Icon name="chevron-down-outline" size={24} color="black" />
           <Text style={styles.toggleButtonText}>درآمدها</Text>
         </View>
-
-        {loading ? (
-          <ActivityIndicator size="small" color="#0000ff" />
-        ) : error ? (
-          <Text style={styles.errorText}>{error}</Text>
-        ) : (
-          showIncomeContent && (
-            <FlatList
-              data={incomes}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => handleSelect(item, 'income')}>
-                  <View style={styles.option}>
-                    <Text style={styles.optionText}>{item.source}</Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-            />
-          )
+        {showIncomeContent && (
+          <FlatList
+            data={incomes}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => handleItemSelect(item, 'income')}>
+                <View style={styles.option}>
+                  <Text style={styles.optionText}>{item.source}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
         )}
       </TouchableOpacity>
     </View>
@@ -238,10 +209,6 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 14,
   },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-  },
 });
 
-export default  FromScreen;
+export default FromScreen;

@@ -13,6 +13,7 @@ import TranScreen from './screens/TranScreen'; // صفحه پرونده ها
 import CalendarScreen from './screens/CalendarScreen'; // مسیر صحیح را وارد کنید
 import FromScreen from './screens/FromScreen'; // مسیر صحیح را وارد کنید
 import ToScreen from './screens/ToScreen'; // مسیر صحیح را وارد کنید
+import MassegeScreen from './screens/MassegeScreen'; // مسیر صحیح را وارد کنید
 import SQLite from 'react-native-sqlite-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -29,8 +30,6 @@ interface bank {
   name: string;
   amount: number;
 }
-
-
 
 const Stack = createStackNavigator();
 
@@ -137,9 +136,6 @@ function App() {
     });
   }, []);
   
-
-
-
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
@@ -200,16 +196,17 @@ function App() {
           }} 
         />
         <Stack.Screen name="Calendar" component={CalendarScreen} />
+        <Stack.Screen name="FromScreen" component={FromScreen} />
         <Stack.Screen 
-          name="FromScreen" 
-          component={FromScreen} 
+          name="ToScreen" 
+          component={ToScreen} 
           options={{ 
             header: (props) => <CustomHeader {...props} title="اضافه کردن تراکنش جدید" icon="duplicate-outline" />,
           }} 
         />
         <Stack.Screen 
-          name="ToScreen" 
-          component={ToScreen} 
+          name="Massege" 
+          component={MassegeScreen} 
           options={{ 
             header: (props) => <CustomHeader {...props} title="اضافه کردن تراکنش جدید" icon="duplicate-outline" />,
           }} 
